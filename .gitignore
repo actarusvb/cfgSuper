@@ -17,7 +17,7 @@ pids
 *.pid.lock
 
 # local cfg
-CfgFolder
+cfgFolder/*
 baseCfg/DM_*
 
 
