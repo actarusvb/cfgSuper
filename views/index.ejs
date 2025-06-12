@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en"><html>
+<head>
+	<link rel="stylesheet" href="/css/index.css" />
+	<script type="text/javascript" src="/js/jquery-3.6.3.min.js"></script>
+	<script type="text/javascript" src="/js/cfgMaster.js"></script>
+</head>
+<body>
+<p>
+<p><button id="Btn_generatedpsk32">Copy</button> <span id="generatedpsk32"></span></p>
+</p>
+<p><a href="/clearner" target="clearner">clearner</a></p>
+</p>
+<form>
+<select name="masterFile" id="masterFile">
+<option value=""> </option>
+ <% fileslist.forEach(function(file){ %>
+	<option value="<%= file %>"><%= file %></option>
+<% }); %>
+</select>
+</form>
+<% cfgs.forEach(function(varx,i){ %>
+	<span class="preconfig"><%= varx %></span><br>
+<% }); %>
+</body>
+</html>

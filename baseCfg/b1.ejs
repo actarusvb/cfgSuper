@@ -1,0 +1,44 @@
+ !#start
+!
+! IV2kr           -> IkeV2 Keyring name
+! ike2_peer_name  -> IkeV2 peer name
+!
+!
+!----------------------------------------------
+!#stop
+!
+!
+crypto ikev2 keyring <%= IV2kr %>
+peer <%= ike2_peer_name %>
+  address <%= ike2_remote_peer_ip %>
+  identity address <%= local_ip %>
+  pre_shared_key <%= IV2kr_preshared_key %>
+!
+!
+crypto ikev2 profile <%= profile_id %>_IV2_profile
+description <%= IV2_profile_desc %>
+match fvrf <%= FVRF %>
+match address local <%= local_ip %>
+match identity remote address <%= ike2_remote_peer_ip %> 255.255.255.255
+ identity local address <%= local_ip %>
+authentication local pre_share
+authentication remote pre_share
+keyring local <%= IV2kr %>
+lifetime 28800
+!
+crypto ipsec profile <%= profile_id %>_Ipsec_pr
+set transform_set aes_256_sha256_ts
+ set pfs group14
+set ikev2_profile <%= profile_id %>_IV2_profile
+!
+interface Tunnel<%= tunnel_id %>
+description <%= tunnel_desc %>
+vrf forwarding <%= tunnel_vrf %>
+ip address <%= tunnel_ip %> <%= tunnel_mask %>
+ip tcp adjust_mss 1350
+tunnel source <%= local_ip %>
+tunnel destination <%= ike2_remote_peer_ip %>
+tunnel vrf <%= FVRF %>
+tunnel protection ipsec profile <%= profile_id %>_Ipsec_pr
+!
+ip route vrf <%= FVRF %> 0.0.0.0 0.0.0.0 <%= FVRF_nextHop %>

@@ -1,0 +1,128 @@
+
+!#start
+! pv_id                -> ID Numerico PV
+! pv_public_ip_r1      -> Ip publico PV
+! IV2kr_preshared_key  -> preshared key
+! pv_BRAND             -> marchio PV
+! pv_name              -> nome PV
+! pv_r1_name           -> nome router remoto
+! pv_r_id              -> rtr id [1-2]
+! pv_citta_via         -> Città e via
+! pv_seed              -> ip magic numebr del PV
+! pv_remote_tunnel_r6   -> numero tunnel remoto con R6
+! pv_remote_tunnel_r7   -> numero tunnel remoto con R7
+! pv_TGU               -> identificativo linea dati remota
+! pv_TGU_provider      -> fornitore linea dati remota
+! pv_tunnel_r6         -> IP locale tunnel verso r6
+! pv_tunnel_r7         -> IP locale tunnel verso r7
+!
+!----------------------------------------------
+!#stop
+!
+! pv_id <%= pv_id %>
+! pv_BRAND <%= pv_BRAND %>
+! pv_name <%= pv_name %>
+! pv_citta_via <%= pv_citta_via %>
+! pv_seed <%= pv_seed %>
+! pv_r1_name <%= pv_r1_name %>
+! pv_r_id <%= pv_r_id %>
+!
+! pv_public_ip_r1 <%= pv_public_ip_r1 %>
+! pv_TGU <%= pv_TGU %>
+! pv_TGU_provider <%= pv_TGU_provider %>
+! IV2kr_preshared_key <%= IV2kr_preshared_key %>
+! pv_remote_tunnel_r6 <%= pv_remote_tunnel_r6 %>
+! pv_remote_tunnel_r7 <%= pv_remote_tunnel_r7 %>
+! pv_tunnel_ip_r6 <%= pv_tunnel_ip_r6 %>
+! pv_tunnel_ip_r7 <%= pv_tunnel_ip_r7 %>
+!
+! <<<<<<<< 
+! <<<<<<<< ror-ced1-r6
+! <<<<<<<< ror-ced1-r6
+! <<<<<<<< 
+!
+
+crypto ikev2 keyring PV-DET
+ peer PV-<%= pv_id %>-Peer
+  address <%= pv_public_ip_r1 %>
+  pre-shared-key <%= IV2kr_preshared_key %>
+ !
+!
+crypto ikev2 profile Dmr-Ikev2-Prof-PV-DET
+! match fvrf INTERNET
+ match identity remote address <%= pv_public_ip_r1 %> 255.255.255.255 
+! identity local address 185.86.131.27
+! authentication remote pre-share
+! authentication local pre-share
+! keyring local PV-DET
+!
+!crypto ipsec profile IPSEC-PV-DET
+! set security-association lifetime seconds 28800
+! set transform-set ESP-AES-256-SHA 
+! set ikev2-profile Dmr-Ikev2-Prof-PV-DET
+!
+interface Tunnel3<%= pv_id %>
+ description <%= pv_id %> | <%= pv_BRAND %> | <%= pv_name %> | <%= pv_r1_name %> | <%= pv_r_id %> | <%= pv_citta_via %> | <%= pv_seed %> | <%= pv_remote_tunnel_r6 %> | TGU <%= pv_TGU %> <%= pv_TGU_provider %> 
+ vrf forwarding PV-DET
+ ip address <%= pv_tunnel_ip_r6 %> 255.255.255.252
+ ip mtu 1414
+ ip policy route-map clear-df-bit
+ tunnel source 185.86.131.27
+ tunnel destination <%= pv_public_ip_r1 %>
+ tunnel vrf INTERNET
+ tunnel protection ipsec profile IPSEC-PV-DET
+!
+ip access-list extended SecureIn
+ remark PV-<%= pv_id %> <%= pv_name %> <%= pv_r1_name %>
+ permit udp host <%= pv_public_ip_r1 %> any eq isakmp
+ permit udp host <%= pv_public_ip_r1 %> any eq non500-isakmp
+ permit esp host <%= pv_public_ip_r1 %> any
+ permit ahp host <%= pv_public_ip_r1 %> any
+!
+router ospf 50 vrf PV-DET
+ network <%= pv_tunnel_ip_r6 %> 0.0.0.0 area 0
+!
+! <<<<<<<< 
+! <<<<<<<< ror-ced1-r7
+! <<<<<<<< ror-ced1-r7
+! <<<<<<<< 
+
+crypto ikev2 keyring PV-DET
+ peer PV-<%= pv_id %>-Peer
+  address <%= pv_public_ip_r1 %>
+  pre-shared-key <%= IV2kr_preshared_key %>
+ !
+!
+crypto ikev2 profile Dmr-Ikev2-Prof-PV-DET
+ !match fvrf INTERNET
+ match identity remote address <%= pv_public_ip_r1 %> 255.255.255.255 
+! identity local address 185.86.131.40
+! authentication remote pre-share
+! authentication local pre-share
+! keyring local PV-DET
+!
+!crypto ipsec profile IPSEC-PV-DET
+! set security-association lifetime seconds 28800
+! set transform-set ESP-AES-256-SHA 
+! set ikev2-profile Dmr-Ikev2-Prof-PV-DET
+!
+interface Tunnel3<%= pv_id %>
+ description <%= pv_id %> | <%= pv_BRAND %> | <%= pv_name %> | <%= pv_r1_name %> | <%= pv_citta_via %> | <%= pv_seed %> | <%= pv_remote_tunnel_r7 %> | TGU <%= pv_TGU %> <%= pv_TGU_provider %> 
+ vrf forwarding PV-DET
+ ip address <%= pv_tunnel_ip_r7 %> 255.255.255.252
+ ip mtu 1414
+ ip policy route-map clear-df-bit
+ tunnel source 185.86.131.40
+ tunnel destination <%= pv_public_ip_r1 %>
+ tunnel vrf INTERNET
+ tunnel protection ipsec profile IPSEC-PV-DET
+!
+ip access-list extended SecureIn
+ remark PV-<%= pv_id %> <%= pv_name %> <%= pv_r1_name %>
+ permit udp host <%= pv_public_ip_r1 %> any eq isakmp
+ permit udp host <%= pv_public_ip_r1 %> any eq non500-isakmp
+ permit esp host <%= pv_public_ip_r1 %> any
+ permit ahp host <%= pv_public_ip_r1 %> any
+
+router ospf 50 vrf PV-DET
+ network <%= pv_tunnel_ip_r7 %> 0.0.0.0 area 0

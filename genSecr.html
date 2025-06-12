@@ -1,0 +1,76 @@
+<html>
+<body>
+	<pre>
+	>>24 <button id="Btn_generatedpsk24">Copy</button> <span id="generatedpsk24"></span><<
+	>>33 <button id="Btn_generatedpsk32">Copy</button> <span id="generatedpsk32"></span><<
+	>>16 <button id="Btn_generatedpsk16">Copy</button> <span id="generatedpsk16"></span><<
+	>>ps <button id="Btn_generatedpass">Copy</button> <span id="generatedpass"></span><< <input name="charser" id="charset" size="80" value="abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNOPQRSTUVWXYZ0123456789@#$%" />
+	</pre>
+	<button
+		class="button button-primary"
+		id="regen-btn"
+		target="console"
+		track-type="tasks"
+		track-name="generatePSKButton"
+		track-metadata-position="body"
+		track-metadata-end-goal="generatePSK">
+	Regenerate
+	</button>
+	<hr>
+
+<script>
+function generateAndFillPsk() {
+	var a = new Uint8Array(24);
+	window.crypto.getRandomValues(a);
+	var b = new Uint8Array(33);
+	window.crypto.getRandomValues(b);
+	var c = new Uint8Array(15);
+	window.crypto.getRandomValues(c);
+   
+	document.getElementById('generatedpsk24').innerText=btoa(String.fromCharCode.apply(null, a));
+	document.getElementById('generatedpsk32').innerText=btoa(String.fromCharCode.apply(null, b));
+	document.getElementById('generatedpsk16').innerText=btoa(String.fromCharCode.apply(null, c));
+	document.getElementById('generatedpass').innerText=generatePassword(15,document.getElementById('charset').value);
+}
+
+function copyIn(element){
+				navigator.clipboard.writeText(document.getElementById(element).textContent);
+				console.log("copied in clipboard "+document.getElementById(element).textContent);
+}
+document.addEventListener("DOMContentLoaded", function(event) {
+				generateAndFillPsk();
+});
+
+document.getElementById('Btn_generatedpsk24').addEventListener('click', function(event) {
+	copyIn("generatedpsk24");
+});
+
+document.getElementById('Btn_generatedpsk32').addEventListener('click', function(event) {
+	copyIn("generatedpsk32");
+});
+
+document.getElementById('Btn_generatedpsk16').addEventListener('click', function(event) {
+	copyIn("generatedpsk16");
+});
+
+document.getElementById('Btn_generatedpass').addEventListener('click', function(event) {
+	copyIn("generatedpass");
+});
+
+document.getElementById('regen-btn').addEventListener('click', function(event) {
+	generateAndFillPsk();
+});
+
+function generatePassword(length,charset) {
+	length = length | 8;
+	charset = charset || "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+	retVal = "";
+	for (var i = 0, n = charset.length; i < length; ++i) {
+		retVal += charset.charAt(Math.floor(Math.random() * n));
+	}
+	return retVal;
+}
+</script>
+</body>
+</html>
+

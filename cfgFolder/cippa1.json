@@ -1,0 +1,1 @@
+{"hostname":"cippa1","pv_id":"pv451","pv_magic":"65","pv_BRAND":"cippi","pv_name":"cippa","BGP_Local_AS":"654321","BGP_Router_id":"1.2.3.4","BGP_Cato_AS":"123456","BGP_Cato_Desc":"cippo","BGP_Local_SrcIntf":"fa0/0.675","BGP_Cato_DescVip":"Cato Vip","BGP_Cato_IpVip":"4.3.2.1","BGP_Networks":"1.2.3,4","template":"BGP_PV.ejs"}

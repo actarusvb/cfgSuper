@@ -1,0 +1,92 @@
+
+!#start
+! hostname				-> Hostname
+! pv_id					-> ID Numerico PV
+! pv_magic				-> magic number
+! pv_BRAND				-> marchio PV
+! pv_name				-> nome PV
+! BGP_Local_AS			-> ASN locale
+! BGP_Router_id			-> IP riferimento BGP
+! BGP_Cato_AS			-> ID numerico ASN
+! BGP_Cato_Desc			-> Descrizone peer group
+! BGP_Local_SrcIntf		-> Nome interface usata come source
+! BGP_Cato_DescVip		-> Descrizone Cato Vip
+! BGP_Cato_IpVip		-> IP address VIP Cato
+! BGP_Networks			->  TXTAREA lista i textArea
+!----------------------------------------------
+!#stop
+<%= vars.hostname %>hostname
+<%= vars.pv_id %>ID Numerico PV
+<%= vars.pv_magic %>magic number
+<%= vars.pv_BRAND %>marchio PV
+<%= vars.pv_name %>nome PV
+<%= vars.BGP_Local_AS %>ASN locale
+<%= vars.BGP_Router_id %>IP riferimento BGP
+<%= vars.BGP_Cato_AS %>ID numerico ASN
+<%= vars.BGP_Cato_Desc %>Descrizone peer group
+<%= vars.BGP_Local_SrcIntf %>Nome interface usata come source
+<%= vars.BGP_Cato_DescVip %>Descrizone Cato Vip
+<%= vars.BGP_Cato_IpVip %>IP address VIP Cato
+<%= vars.BGP_Networks %> TXTAREA lista i textArea
+
+!
+!
+router bgp <%= vars.BGP_Local_AS %>
+ bgp router-id <%= vars.BGP_Router_id %>
+ bgp log-neighbor-changes
+ neighbor CATO peer-group
+ neighbor CATO remote-as <%= vars.BGP_Cato_AS %>
+ neighbor CATO description <%= vars.BGP_Cato_Desc %>
+ neighbor CATO update-source <%= vars.BGP_Local_SrcIntf %>
+ neighbor <%= vars.BGP_Cato_IpVip %> peer-group CATO
+ neighbor <%= vars.BGP_Cato_IpVip %> shutdown
+ neighbor <%= vars.BGP_Cato_IpVip %> description Cato VIP
+ !
+ address-family ipv4
+  no synchronization
+  neighbor CATO send-community both
+  neighbor CATO next-hop-self
+  neighbor CATO soft-reconfiguration inbound
+  neighbor CATO route-map FromCatoPV in
+  neighbor CATO route-map ToCatoPV out
+  neighbor <%= vars.BGP_Cato_IpVip %> activate
+  no auto-summary
+ exit-address-family
+!
+ip prefix-list FromCatoPV seq 2 deny 0.0.0.0/0 le 32
+ip prefix-list FromCatoPV seq 10 permit 0.0.0.0/0
+ip prefix-list FromCatoPV seq 15 permit 10.0.0.0/8 le 32
+ip prefix-list FromCatoPV seq 20 permit 0.0.0.0/0 le 32
+!
+ip prefix-list ToCatoPV seq 2 deny 0.0.0.0/0 le 32
+ip prefix-list ToCatoPV seq 10 permit 10.66.177.0/24
+ip prefix-list ToCatoPV seq 15 permit 172.25.177.0/26
+ip prefix-list ToCatoPV seq 20 permit 172.26.55.96/27
+ip prefix-list ToCatoPV seq 25 permit 172.26.55.240/28
+ip prefix-list ToCatoPV seq 30 permit 172.26.177.0/26
+ip prefix-list ToCatoPV seq 35 permit 172.26.177.64/29
+ip prefix-list ToCatoPV seq 40 permit 172.26.177.72/29
+ip prefix-list ToCatoPV seq 45 permit 172.26.177.80/29
+ip prefix-list ToCatoPV seq 50 permit 172.26.177.88/29
+ip prefix-list ToCatoPV seq 55 permit 172.26.177.128/26
+ip prefix-list ToCatoPV seq 60 permit 172.26.177.192/28
+ip prefix-list ToCatoPV seq 65 permit 172.28.55.192/27
+ip prefix-list ToCatoPV seq 70 permit 172.28.177.0/27
+ip prefix-list ToCatoPV seq 75 permit 172.28.177.48/28
+ip prefix-list ToCatoPV seq 80 permit 172.28.177.64/27
+ip prefix-list ToCatoPV seq 85 permit 172.28.177.112/29
+ip prefix-list ToCatoPV seq 90 permit 172.28.177.120/29
+ip prefix-list ToCatoPV seq 95 permit 172.28.177.144/28
+ip prefix-list ToCatoPV seq 100 permit 172.28.177.192/27
+ip prefix-list ToCatoPV seq 105 permit 172.28.177.248/29
+ip prefix-list ToCatoPV seq 110 permit 172.29.177.0/24
+ip prefix-list ToCatoPV seq 115 permit 192.168.55.0/28
+ip prefix-list ToCatoPV seq 120 permit 192.168.55.128/26
+ip prefix-list ToCatoPV seq 125 permit 192.168.55.192/26
+ip prefix-list ToCatoPV seq 130 permit 192.168.177.0/24
+!
+route-map ToCatoPV permit 10
+ match ip address prefix-list ToCatoPV
+!
+route-map FromCatoPV permit 10
+ match ip address prefix-list FromCatoPV
